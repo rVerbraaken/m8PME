@@ -18,13 +18,21 @@ manager.set_sample_rate(sample_rate)
 
 # Current index in the circular buffer
 current_index = 0
-
-
+baap = True
+angle1 = 0
 
 def animate(frame):
+    global baap, angle1
     global accelerometer, gyroscope, current_index
 
     measurements = manager.get_measurements()
+
+    if baap:
+        for sensor, data in measurements.items():
+            if len(data) > 0:
+                for datapoint in data:
+                    angle1 = datapoint[1] * 100
+        baap = False
 
     for sensor, data in measurements.items():
         if len(data) > 0:
@@ -32,7 +40,10 @@ def animate(frame):
                 accelerometer[current_index] = datapoint[:3]
                 gyroscope[current_index] = datapoint[3:6]
                 current_index = (current_index + 1) % max_samples
-                angle1 = datapoint[1] * 100
+                if angle1 > 90:
+                    angle1 = 90 + (90 - (datapoint[1] * 100))
+                else:
+                    angle1 = datapoint[1] * 100
                 print(angle1)
 
     # Clear axis
